@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { transformToN8NPayload, sendToN8N } from "@/lib/n8n";
-import { EmployeeFormData } from "@/types";
+import { EmployeeFormData, FactorialEmployee } from "@/types";
 import { getEmployees } from "@/lib/factorial";
 
 export async function POST(request: NextRequest) {
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     // Obtener la lista de empleados para buscar el nombre completo del tutor
     const apiKey = process.env.FACTORIAL_API_KEY || request.headers.get("x-api-key");
-    let employees = [];
+    let employees: FactorialEmployee[] = [];
     if (apiKey) {
       try {
         employees = await getEmployees(apiKey);

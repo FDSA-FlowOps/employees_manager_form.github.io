@@ -35,7 +35,10 @@ export function useActiveEmployees(): UseActiveEmployeesReturn {
   };
 
   useEffect(() => {
-    fetchEmployees();
+    // Solo ejecutar en el cliente, no durante el build estático
+    if (typeof window !== 'undefined') {
+      fetchEmployees();
+    }
   }, []);
 
   return {

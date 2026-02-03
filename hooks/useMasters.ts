@@ -68,7 +68,10 @@ export function useMasters(): UseMastersReturn {
   };
 
   useEffect(() => {
-    fetchMasters();
+    // Solo ejecutar en el cliente, no durante el build estático
+    if (typeof window !== 'undefined') {
+      fetchMasters();
+    }
   }, []);
 
   return {

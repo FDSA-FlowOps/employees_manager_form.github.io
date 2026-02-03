@@ -72,7 +72,10 @@ export function useFactorialData(): UseFactorialDataReturn {
   };
 
   useEffect(() => {
-    fetchData();
+    // Solo ejecutar en el cliente, no durante el build estático
+    if (typeof window !== 'undefined') {
+      fetchData();
+    }
   }, []);
 
   return {
