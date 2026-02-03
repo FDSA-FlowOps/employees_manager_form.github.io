@@ -28,14 +28,19 @@ export default function LoginPage() {
 
       if (success) {
         toast.success("Inicio de sesión exitoso");
-        router.push("/");
+        // El hook useAuth ya actualiza el estado, así que la redirección se manejará automáticamente
+        // Pequeño delay para que el toast se muestre antes de redirigir
+        setTimeout(() => {
+          router.push("/");
+          router.refresh();
+        }, 300);
       } else {
         toast.error("Usuario o contraseña incorrectos");
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       toast.error("Error al iniciar sesión");
-    } finally {
       setIsLoading(false);
     }
   };

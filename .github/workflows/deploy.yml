@@ -2,7 +2,9 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -14,88 +16,53 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build with Next.js
+        env:
+          NEXT_PUBLIC_AUTH_USERNAME: ${{ secrets.NEXT_PUBLIC_AUTH_USERNAME }}
+          NEXT_PUBLIC_AUTH_PASSWORD: ${{ secrets.NEXT_PUBLIC_AUTH_PASSWORD }}
+          FACTORIAL_API_KEY: ${{ secrets.FACTORIAL_API_KEY }}
+          N8N_WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
+          N8N_MASTERS_WEBHOOK_URL: ${{ secrets.N8N_MASTERS_WEBHOOK_URL }}
+          N8N_EMPLOYEE_EXIT_WEBHOOK_URL: ${{ secrets.N8N_EMPLOYEE_EXIT_WEBHOOK_URL }}
+        run: npm run build:gh-pages
+
+      - name: Add .nojekyll file
+        run: touch ./out/.nojekyll
+
+      - name: List output directory (for debugging)
+        run: |
+          echo "Contents of ./out directory:"
+          ls -la ./out
+          echo "Checking for CSS files:"
+          find ./out -name "*.css" -type f
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    needs: build
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Build
-        run: npm run build:gh-pages
-        env:
-          # Variables de entorno desde GitHub Secrets
-          # IMPORTANTE: Configura estos secrets en Settings → Secrets and variables → Actions
-          AUTH_USERNAME: ${{ secrets.AUTH_USERNAME }}
-          AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
-          FACTORIAL_API_KEY: ${{ secrets.FACTORIAL_API_KEY }}
-          N8N_WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
-          N8N_EMPLOYEE_EXIT_WEBHOOK_URL: ${{ secrets.N8N_EMPLOYEE_EXIT_WEBHOOK_URL }}
-          N8N_MASTERS_WEBHOOK_URL: ${{ secrets.N8N_MASTERS_WEBHOOK_URL }}
-          # Variables públicas para autenticación del cliente (solo para GitHub Pages)
-          # Estas se inyectan en el bundle JavaScript en tiempo de build
-          NEXT_PUBLIC_AUTH_USERNAME: ${{ secrets.AUTH_USERNAME }}
-          NEXT_PUBLIC_AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
-          # Variable para indicar que es un build de GitHub Pages
-          GITHUB_PAGES: 'true'
-      
-      - name: Ensure .nojekyll exists
-        run: |
-          # Asegurar que .nojekyll existe en la raíz de out
-          touch out/.nojekyll
-          echo "✅ .nojekyll creado/verificado"
-      
-      - name: Ensure .nojekyll exists
-        run: |
-          # Asegurar que .nojekyll existe en la raíz de out
-          touch out/.nojekyll
-          echo "✅ .nojekyll creado/verificado"
-      
-      - name: Verify build output
-        run: |
-          echo "📁 Verificando estructura del build..."
-          ls -la out/ | head -10
-          echo ""
-          echo "📄 Verificando CSS..."
-          if [ -d "out/_next/static/css" ]; then
-            ls -la out/_next/static/css/
-            echo "✅ Directorio CSS encontrado"
-          else
-            echo "❌ No se encontró el directorio CSS"
-          fi
-          echo ""
-          echo "🔍 Verificando .nojekyll..."
-          if [ -f "out/.nojekyll" ]; then
-            echo "✅ .nojekyll existe"
-          else
-            echo "❌ .nojekyll NO existe - creándolo..."
-            touch out/.nojekyll
-          fi
-          echo ""
-          echo "🔍 Verificando variables de entorno..."
-          echo "NEXT_PUBLIC_AUTH_USERNAME está configurado: $([ -n "$NEXT_PUBLIC_AUTH_USERNAME" ] && echo 'Sí' || echo 'No')"
-          echo "NEXT_PUBLIC_AUTH_PASSWORD está configurado: $([ -n "$NEXT_PUBLIC_AUTH_PASSWORD" ] && echo 'Sí' || echo 'No')"
-      
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-      
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './out'
-      
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-

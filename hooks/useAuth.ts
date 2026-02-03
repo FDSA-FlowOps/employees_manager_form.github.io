@@ -27,26 +27,30 @@ export function useAuth() {
   useEffect(() => {
     // Verificar autenticación al cargar
     const checkAuth = () => {
-      const authSession = document.cookie
+      // Verificar tanto cookie como localStorage para mayor confiabilidad
+      const authSessionCookie = document.cookie
         .split("; ")
         .find((row) => row.startsWith("auth-session="))
         ?.split("=")[1];
-
-      const isAuth = authSession === "authenticated";
+      
+      const authSessionStorage = localStorage.getItem("auth-session");
+      
+      const isAuth = authSessionCookie === "authenticated" || authSessionStorage === "authenticated";
       setIsAuthenticated(isAuth);
       setIsLoading(false);
 
       // Redirigir si no está autenticado y no está en login
-      if (!isAuth && pathname !== "/login") {
+      if (!isAuth && pathname !== "/login" && pathname !== "/login/") {
         router.push("/login");
       }
 
       // Redirigir si está autenticado y está en login
-      if (isAuth && pathname === "/login") {
+      if (isAuth && (pathname === "/login" || pathname === "/login/")) {
         router.push("/");
       }
     };
 
+    // Ejecutar inmediatamente
     checkAuth();
   }, [pathname, router]);
 
@@ -64,7 +68,14 @@ export function useAuth() {
     if (username === validUsername && password === validPassword) {
       // Establecer cookie del cliente
       document.cookie = `auth-session=authenticated; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 días
+      
+      // También guardar en localStorage como respaldo
+      localStorage.setItem("auth-session", "authenticated");
+      
+      // Actualizar el estado inmediatamente
       setIsAuthenticated(true);
+      setIsLoading(false);
+      
       return true;
     }
     return false;
@@ -73,6 +84,8 @@ export function useAuth() {
   const logout = () => {
     // Eliminar cookie
     document.cookie = "auth-session=; path=/; max-age=0";
+    // Eliminar de localStorage también
+    localStorage.removeItem("auth-session");
     setIsAuthenticated(false);
     router.push("/login");
   };
