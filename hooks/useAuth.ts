@@ -4,10 +4,19 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 // Credenciales hardcodeadas (solo para GitHub Pages estático)
-// En producción real, esto debería estar en variables de entorno del cliente
-// o mejor aún, usar un servicio de autenticación externo
+// IMPORTANTE: Estas variables se inyectan en tiempo de build
+// Si están vacías, la autenticación no funcionará
+// Configúralas en GitHub Secrets como NEXT_PUBLIC_AUTH_USERNAME y NEXT_PUBLIC_AUTH_PASSWORD
 const AUTH_USERNAME = process.env.NEXT_PUBLIC_AUTH_USERNAME || "";
 const AUTH_PASSWORD = process.env.NEXT_PUBLIC_AUTH_PASSWORD || "";
+
+// Debug: Verificar si las variables están disponibles (solo en desarrollo)
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  console.log('Auth config:', { 
+    hasUsername: !!AUTH_USERNAME, 
+    hasPassword: !!AUTH_PASSWORD 
+  });
+}
 
 export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -43,7 +52,16 @@ export function useAuth() {
 
   const login = async (username: string, password: string): Promise<boolean> => {
     // Verificar credenciales
-    if (username === AUTH_USERNAME && password === AUTH_PASSWORD) {
+    // Si las variables están vacías, usar valores por defecto para desarrollo
+    const validUsername = AUTH_USERNAME || process.env.NEXT_PUBLIC_AUTH_USERNAME || "";
+    const validPassword = AUTH_PASSWORD || process.env.NEXT_PUBLIC_AUTH_PASSWORD || "";
+    
+    if (!validUsername || !validPassword) {
+      console.error("⚠️ Las credenciales no están configuradas. Configura NEXT_PUBLIC_AUTH_USERNAME y NEXT_PUBLIC_AUTH_PASSWORD en GitHub Secrets.");
+      return false;
+    }
+    
+    if (username === validUsername && password === validPassword) {
       // Establecer cookie del cliente
       document.cookie = `auth-session=authenticated; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 días
       setIsAuthenticated(true);

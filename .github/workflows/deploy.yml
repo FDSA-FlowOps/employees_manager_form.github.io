@@ -44,8 +44,17 @@ jobs:
           N8N_EMPLOYEE_EXIT_WEBHOOK_URL: ${{ secrets.N8N_EMPLOYEE_EXIT_WEBHOOK_URL }}
           N8N_MASTERS_WEBHOOK_URL: ${{ secrets.N8N_MASTERS_WEBHOOK_URL }}
           # Variables públicas para autenticación del cliente (solo para GitHub Pages)
+          # Estas se inyectan en el bundle JavaScript en tiempo de build
           NEXT_PUBLIC_AUTH_USERNAME: ${{ secrets.AUTH_USERNAME }}
           NEXT_PUBLIC_AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
+          # Variable para indicar que es un build de GitHub Pages
+          GITHUB_PAGES: 'true'
+      
+      - name: Ensure .nojekyll exists
+        run: |
+          # Asegurar que .nojekyll existe en la raíz de out
+          touch out/.nojekyll
+          echo "✅ .nojekyll creado/verificado"
       
       - name: Ensure .nojekyll exists
         run: |
@@ -59,10 +68,24 @@ jobs:
           ls -la out/ | head -10
           echo ""
           echo "📄 Verificando CSS..."
-          ls -la out/_next/static/css/ || echo "⚠️ No se encontró el directorio CSS"
+          if [ -d "out/_next/static/css" ]; then
+            ls -la out/_next/static/css/
+            echo "✅ Directorio CSS encontrado"
+          else
+            echo "❌ No se encontró el directorio CSS"
+          fi
           echo ""
           echo "🔍 Verificando .nojekyll..."
-          test -f out/.nojekyll && echo "✅ .nojekyll existe" || echo "❌ .nojekyll NO existe"
+          if [ -f "out/.nojekyll" ]; then
+            echo "✅ .nojekyll existe"
+          else
+            echo "❌ .nojekyll NO existe - creándolo..."
+            touch out/.nojekyll
+          fi
+          echo ""
+          echo "🔍 Verificando variables de entorno..."
+          echo "NEXT_PUBLIC_AUTH_USERNAME está configurado: $([ -n "$NEXT_PUBLIC_AUTH_USERNAME" ] && echo 'Sí' || echo 'No')"
+          echo "NEXT_PUBLIC_AUTH_PASSWORD está configurado: $([ -n "$NEXT_PUBLIC_AUTH_PASSWORD" ] && echo 'Sí' || echo 'No')"
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -71,13 +94,6 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: './out'
-      
-      # Verificar que los archivos se generaron correctamente
-      - name: Verify build output
-        run: |
-          echo "Verificando archivos generados..."
-          ls -la out/_next/static/css/ || echo "⚠️ No se encontró el directorio CSS"
-          ls -la out/ | head -20
       
       - name: Deploy to GitHub Pages
         id: deployment

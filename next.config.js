@@ -31,9 +31,16 @@ const nextConfig = {
   // Asegurar que los assets se generen con rutas correctas
   distDir: 'out',
   
-  // Configuración adicional para asegurar que los assets se carguen correctamente
-  experimental: {
-    // Asegurar que los assets se generen correctamente
+  // Configuración de webpack para asegurar que los assets se generen correctamente
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Asegurar que los assets se resuelvan correctamente
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      };
+    }
+    return config;
   },
 };
 
