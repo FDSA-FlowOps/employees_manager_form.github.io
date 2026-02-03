@@ -1,13 +1,14 @@
 /** @type {import('next').NextConfig} */
+const isProd = process.env.NODE_ENV === 'production'
+const isGithubPages = process.env.GITHUB_PAGES === 'true'
+
 const nextConfig = {
   output: 'export',
-  // Para sitio de organización (*.github.io) NO usar basePath
-  basePath: '',
-  assetPrefix: '',
+  basePath: isGithubPages ? '/employees_manager_form.github.io' : '',
+  assetPrefix: isGithubPages ? '/employees_manager_form.github.io' : '',
   images: {
     unoptimized: true,
   },
-  // Asegurar que Tailwind se compile correctamente
   trailingSlash: true,
 }
 
