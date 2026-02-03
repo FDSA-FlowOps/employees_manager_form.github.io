@@ -1,35 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { LogOut } from "lucide-react";
 import Tabs from "@/components/Tabs";
 import AltaNuevoCompanero from "@/components/AltaNuevoCompanero";
 import SalidaCompanero from "@/components/SalidaCompanero";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("alta");
   const router = useRouter();
+  const { isAuthenticated, isLoading, logout } = useAuth();
 
-  const handleLogout = async () => {
-    try {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al cerrar sesión");
-      }
-
-      toast.success("Sesión cerrada correctamente");
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
       router.push("/login");
-      router.refresh();
-    } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-      toast.error("Error al cerrar sesión");
     }
+  }, [isAuthenticated, isLoading, router]);
+
+  const handleLogout = () => {
+    logout();
+    toast.success("Sesión cerrada correctamente");
   };
+
+  if (isLoading || !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
 
   const tabs = [
     {

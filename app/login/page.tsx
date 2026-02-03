@@ -1,49 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { Lock, User } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { isAuthenticated, isLoading: authLoading, login } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      const success = await login(username, password);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Error al iniciar sesión");
+      if (success) {
+        toast.success("Inicio de sesión exitoso");
+        router.push("/");
+      } else {
+        toast.error("Usuario o contraseña incorrectos");
       }
-
-      toast.success("Inicio de sesión exitoso");
-      router.push("/");
-      router.refresh();
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Error al iniciar sesión";
-      toast.error(errorMessage);
+      toast.error("Error al iniciar sesión");
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (authLoading || isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4">

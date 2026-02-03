@@ -43,6 +43,26 @@ jobs:
           N8N_WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
           N8N_EMPLOYEE_EXIT_WEBHOOK_URL: ${{ secrets.N8N_EMPLOYEE_EXIT_WEBHOOK_URL }}
           N8N_MASTERS_WEBHOOK_URL: ${{ secrets.N8N_MASTERS_WEBHOOK_URL }}
+          # Variables públicas para autenticación del cliente (solo para GitHub Pages)
+          NEXT_PUBLIC_AUTH_USERNAME: ${{ secrets.AUTH_USERNAME }}
+          NEXT_PUBLIC_AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
+      
+      - name: Ensure .nojekyll exists
+        run: |
+          # Asegurar que .nojekyll existe en la raíz de out
+          touch out/.nojekyll
+          echo "✅ .nojekyll creado/verificado"
+      
+      - name: Verify build output
+        run: |
+          echo "📁 Verificando estructura del build..."
+          ls -la out/ | head -10
+          echo ""
+          echo "📄 Verificando CSS..."
+          ls -la out/_next/static/css/ || echo "⚠️ No se encontró el directorio CSS"
+          echo ""
+          echo "🔍 Verificando .nojekyll..."
+          test -f out/.nojekyll && echo "✅ .nojekyll existe" || echo "❌ .nojekyll NO existe"
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -51,6 +71,13 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: './out'
+      
+      # Verificar que los archivos se generaron correctamente
+      - name: Verify build output
+        run: |
+          echo "Verificando archivos generados..."
+          ls -la out/_next/static/css/ || echo "⚠️ No se encontró el directorio CSS"
+          ls -la out/ | head -20
       
       - name: Deploy to GitHub Pages
         id: deployment
