@@ -39,6 +39,7 @@ jobs:
           N8N_WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
           N8N_MASTERS_WEBHOOK_URL: ${{ secrets.N8N_MASTERS_WEBHOOK_URL }}
           N8N_EMPLOYEE_EXIT_WEBHOOK_URL: ${{ secrets.N8N_EMPLOYEE_EXIT_WEBHOOK_URL }}
+          N8N_JWT_TOKEN: ${{ secrets.N8N_JWT_TOKEN }}
         run: npm run build:gh-pages
 
       - name: Add .nojekyll file

@@ -76,12 +76,23 @@ export async function POST(request: NextRequest) {
 
     console.log("Payload enviado a n8n:", JSON.stringify(payload, null, 2));
 
+    // Obtener el JWT token de las variables de entorno
+    const jwtToken = process.env.N8N_JWT_TOKEN;
+
+    // Preparar headers
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    // Agregar JWT si está disponible
+    if (jwtToken) {
+      headers["Authorization"] = `Bearer ${jwtToken}`;
+    }
+
     // Enviar a n8n
     const response = await fetch(n8nUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify(payload),
     });
 

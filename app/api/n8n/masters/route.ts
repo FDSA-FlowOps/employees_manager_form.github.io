@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const webhookUrl = process.env.N8N_MASTERS_WEBHOOK_URL;
+  const jwtToken = process.env.N8N_JWT_TOKEN;
 
   if (!webhookUrl) {
     return NextResponse.json(
@@ -17,12 +18,19 @@ export async function GET(request: NextRequest) {
 
     console.log("Llamando a webhook:", webhookUrl);
     
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    };
+
+    // Agregar JWT si está disponible
+    if (jwtToken) {
+      headers["Authorization"] = `Bearer ${jwtToken}`;
+    }
+    
     const response = await fetch(webhookUrl, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
+      headers,
       cache: "no-store", // Deshabilitar cache para obtener siempre datos frescos
       signal: controller.signal,
     });

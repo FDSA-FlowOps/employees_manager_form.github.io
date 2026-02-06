@@ -137,13 +137,21 @@ export function transformToN8NPayload(
  */
 export async function sendToN8N(
   url: string,
-  payload: N8NPayload
+  payload: N8NPayload,
+  jwtToken?: string
 ): Promise<any> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  // Agregar JWT si está disponible
+  if (jwtToken) {
+    headers["Authorization"] = `Bearer ${jwtToken}`;
+  }
+
   const response = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify(payload),
   });
 

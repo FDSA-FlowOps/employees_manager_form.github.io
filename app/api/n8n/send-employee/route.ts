@@ -31,8 +31,11 @@ export async function POST(request: NextRequest) {
     // Transformar los datos al formato de n8n
     const payload = transformToN8NPayload(formData, employees);
 
+    // Obtener el JWT token de las variables de entorno
+    const jwtToken = process.env.N8N_JWT_TOKEN;
+
     // Enviar a n8n y obtener la respuesta completa
-    const n8nResponse = await sendToN8N(n8nUrl, payload);
+    const n8nResponse = await sendToN8N(n8nUrl, payload, jwtToken);
 
     // Devolver la respuesta completa de n8n
     return NextResponse.json(n8nResponse);

@@ -101,6 +101,9 @@ FACTORIAL_API_KEY=tu_api_key_de_factorial
 N8N_WEBHOOK_URL=https://tu-instancia-n8n.com/webhook/alta-empleado
 N8N_EMPLOYEE_EXIT_WEBHOOK_URL=https://tu-instancia-n8n.com/webhook/salida-empleado
 N8N_MASTERS_WEBHOOK_URL=https://tu-instancia-n8n.com/webhook/masters
+
+# n8n JWT Token (para validación en n8n)
+N8N_JWT_TOKEN=tu_jwt_token_aqui
 ```
 
 #### Para Producción:
@@ -136,6 +139,7 @@ Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 | `N8N_WEBHOOK_URL` | URL del webhook de n8n para alta de empleados | ✅ Sí |
 | `N8N_EMPLOYEE_EXIT_WEBHOOK_URL` | URL del webhook de n8n para salida de empleados | ✅ Sí |
 | `N8N_MASTERS_WEBHOOK_URL` | URL del webhook unificado de n8n para maestros | ✅ Sí |
+| `N8N_JWT_TOKEN` | JWT token para autenticación en las peticiones a n8n | ✅ Sí |
 
 **⚠️ IMPORTANTE:** El archivo `.env` está en `.gitignore` y **NUNCA** debe subirse al repositorio. Ver [docs/SECURITY.md](docs/SECURITY.md) para mejores prácticas de seguridad.
 
