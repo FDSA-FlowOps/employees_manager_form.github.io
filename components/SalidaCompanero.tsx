@@ -10,6 +10,7 @@ import Modal from "@/components/Modal";
 import ResultsModal from "@/components/ResultsModal";
 import { EmployeeExitFormData } from "@/types";
 import { Loader2 } from "lucide-react";
+import { useMasters } from "@/hooks/useMasters";
 
 const employeeExitSchema = z.object({
   employeeId: z
@@ -48,6 +49,7 @@ export default function SalidaCompanero() {
     google_gestionado?: boolean;
     jira_gestionado?: boolean;
   }>({});
+  const { usuariosGoogle } = useMasters();
 
   const {
     register,
@@ -72,20 +74,15 @@ export default function SalidaCompanero() {
     setIsSubmittingToN8N(true);
 
     try {
-      const response = await fetch("/api/n8n/send-employee-exit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      // Convertir usuarios de Google al formato esperado
+      const googleUsers = usuariosGoogle.map((user) => ({
+        id: user.id,
+        email: user.email,
+      }));
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error al enviar datos a n8n");
-      }
-
-      const result = await response.json();
+      // Llamar directamente a n8n desde el cliente
+      const { sendEmployeeExitToN8N } = await import("@/lib/n8n-client");
+      const result = await sendEmployeeExitToN8N(formData, googleUsers);
       
       // Extraer los resultados de la respuesta de n8n
       const responseResults = {

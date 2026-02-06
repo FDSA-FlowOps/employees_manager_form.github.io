@@ -97,13 +97,16 @@ AUTH_PASSWORD=tu_contraseña
 # Factorial API
 FACTORIAL_API_KEY=tu_api_key_de_factorial
 
-# n8n Webhooks
-N8N_WEBHOOK_URL=https://tu-instancia-n8n.com/webhook/alta-empleado
-N8N_EMPLOYEE_EXIT_WEBHOOK_URL=https://tu-instancia-n8n.com/webhook/salida-empleado
-N8N_MASTERS_WEBHOOK_URL=https://tu-instancia-n8n.com/webhook/masters
+# n8n Webhooks (NEXT_PUBLIC_* para GitHub Pages - se exponen en el cliente)
+NEXT_PUBLIC_N8N_WEBHOOK_URL=https://tu-instancia-n8n.com/webhook/alta-empleado
+NEXT_PUBLIC_N8N_EMPLOYEE_EXIT_WEBHOOK_URL=https://tu-instancia-n8n.com/webhook/salida-empleado
+NEXT_PUBLIC_N8N_MASTERS_WEBHOOK_URL=https://tu-instancia-n8n.com/webhook/masters
 
-# n8n JWT Token (para validación en n8n)
-N8N_JWT_TOKEN=tu_jwt_token_aqui
+# n8n JWT Token (NEXT_PUBLIC_* para GitHub Pages - se expone en el cliente)
+NEXT_PUBLIC_N8N_JWT_TOKEN=tu_jwt_token_aqui
+
+# NOTA: Para GitHub Pages, todas las variables de n8n deben tener el prefijo NEXT_PUBLIC_
+# ya que las llamadas se hacen directamente desde el cliente (no hay servidor)
 ```
 
 #### Para Producción:
@@ -136,10 +139,12 @@ Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 | `AUTH_USERNAME` | Usuario para el sistema de login | ✅ Sí |
 | `AUTH_PASSWORD` | Contraseña para el sistema de login | ✅ Sí |
 | `FACTORIAL_API_KEY` | API key de Factorial | ✅ Sí |
-| `N8N_WEBHOOK_URL` | URL del webhook de n8n para alta de empleados | ✅ Sí |
-| `N8N_EMPLOYEE_EXIT_WEBHOOK_URL` | URL del webhook de n8n para salida de empleados | ✅ Sí |
-| `N8N_MASTERS_WEBHOOK_URL` | URL del webhook unificado de n8n para maestros | ✅ Sí |
-| `N8N_JWT_TOKEN` | JWT token para autenticación en las peticiones a n8n | ✅ Sí |
+| `NEXT_PUBLIC_N8N_WEBHOOK_URL` | URL del webhook de n8n para alta de empleados (cliente) | ✅ Sí |
+| `NEXT_PUBLIC_N8N_EMPLOYEE_EXIT_WEBHOOK_URL` | URL del webhook de n8n para salida de empleados (cliente) | ✅ Sí |
+| `NEXT_PUBLIC_N8N_MASTERS_WEBHOOK_URL` | URL del webhook unificado de n8n para maestros (cliente) | ✅ Sí |
+| `NEXT_PUBLIC_N8N_JWT_TOKEN` | JWT token para autenticación en las peticiones a n8n (cliente) | ✅ Sí |
+
+**⚠️ IMPORTANTE para GitHub Pages:** Todas las variables de n8n deben tener el prefijo `NEXT_PUBLIC_` porque las llamadas se hacen directamente desde el cliente del navegador (no hay servidor que pueda ocultar estas credenciales).
 
 **⚠️ IMPORTANTE:** El archivo `.env` está en `.gitignore` y **NUNCA** debe subirse al repositorio. Ver [docs/SECURITY.md](docs/SECURITY.md) para mejores prácticas de seguridad.
 

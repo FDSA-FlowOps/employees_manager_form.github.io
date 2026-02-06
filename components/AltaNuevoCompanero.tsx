@@ -284,20 +284,9 @@ export default function AltaNuevoCompanero() {
     setIsSubmittingToN8N(true);
 
     try {
-      const response = await fetch("/api/n8n/send-employee", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error al enviar datos a n8n");
-      }
-
-      const result = await response.json();
+      // Llamar directamente a n8n desde el cliente
+      const { sendEmployeeToN8N } = await import("@/lib/n8n-client");
+      const result = await sendEmployeeToN8N(formData, employees);
       
       // Extraer los resultados de la respuesta
       const responseResults = {

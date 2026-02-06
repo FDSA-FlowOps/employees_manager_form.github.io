@@ -45,14 +45,9 @@ export function useMasters(): UseMastersReturn {
     setError(null);
 
     try {
-      const response = await fetch("/api/n8n/masters");
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error al cargar maestros");
-      }
-
-      const data: MastersData = await response.json();
+      // Llamar directamente a n8n desde el cliente
+      const { fetchMastersFromN8N } = await import("@/lib/n8n-client");
+      const data = await fetchMastersFromN8N();
 
       // Asegurar que siempre sean arrays
       setCalendarios(Array.isArray(data.calendarios) ? data.calendarios : []);
