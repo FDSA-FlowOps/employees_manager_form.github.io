@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 const FACTORIAL_API_BASE = "https://api.factorialhr.com/api/2025-01-01/resources";
 
-// Marcar como dinámica para evitar pre-renderizado en build estático
-export const dynamic = 'force-dynamic';
-
 export async function GET(request: NextRequest) {
-  const apiKey = process.env.FACTORIAL_API_KEY || request.headers.get("x-api-key");
+  // Prioridad: NEXT_PUBLIC_FACTORIAL_API_KEY > FACTORIAL_API_KEY > header
+  // Durante el build estático, solo usar variable de entorno (request.headers no está disponible)
+  const apiKey = process.env.NEXT_PUBLIC_FACTORIAL_API_KEY || process.env.FACTORIAL_API_KEY || (request?.headers?.get("x-api-key") ?? null);
 
   if (!apiKey) {
     return NextResponse.json(
