@@ -18,15 +18,17 @@ export function useActiveEmployees(): UseActiveEmployeesReturn {
     setError(null);
 
     try {
-      const response = await fetch("/api/factorial/active-employees");
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error al cargar empleados activos");
-      }
-
-      const data = await response.json();
-      setEmployees(data);
+      // Llamar directamente a Factorial desde el cliente
+      const { getEmployees } = await import("@/lib/factorial-client");
+      const employeesData = await getEmployees();
+      
+      // Mapear solo los campos que necesitamos: id y full_name
+      const mappedEmployees = employeesData.map((emp: any) => ({
+        id: emp.id,
+        full_name: emp.full_name,
+      }));
+      
+      setEmployees(mappedEmployees);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido al cargar empleados activos");
     } finally {
