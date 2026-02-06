@@ -94,8 +94,8 @@ cp .env.example .env
 AUTH_USERNAME=tu_usuario
 AUTH_PASSWORD=tu_contraseña
 
-# Factorial API
-FACTORIAL_API_KEY=tu_api_key_de_factorial
+# Factorial API (NEXT_PUBLIC_* para GitHub Pages - se expone en el cliente)
+NEXT_PUBLIC_FACTORIAL_API_KEY=tu_api_key_de_factorial
 
 # n8n Webhooks (NEXT_PUBLIC_* para GitHub Pages - se exponen en el cliente)
 NEXT_PUBLIC_N8N_WEBHOOK_URL=https://tu-instancia-n8n.com/webhook/alta-empleado
@@ -138,7 +138,7 @@ Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 |----------|-------------|-----------|
 | `AUTH_USERNAME` | Usuario para el sistema de login | ✅ Sí |
 | `AUTH_PASSWORD` | Contraseña para el sistema de login | ✅ Sí |
-| `FACTORIAL_API_KEY` | API key de Factorial | ✅ Sí |
+| `NEXT_PUBLIC_FACTORIAL_API_KEY` | API key de Factorial (cliente) | ✅ Sí |
 | `NEXT_PUBLIC_N8N_WEBHOOK_URL` | URL del webhook de n8n para alta de empleados (cliente) | ✅ Sí |
 | `NEXT_PUBLIC_N8N_EMPLOYEE_EXIT_WEBHOOK_URL` | URL del webhook de n8n para salida de empleados (cliente) | ✅ Sí |
 | `NEXT_PUBLIC_N8N_MASTERS_WEBHOOK_URL` | URL del webhook unificado de n8n para maestros (cliente) | ✅ Sí |
