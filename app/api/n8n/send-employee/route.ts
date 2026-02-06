@@ -3,9 +3,6 @@ import { transformToN8NPayload, sendToN8N } from "@/lib/n8n";
 import { EmployeeFormData, FactorialEmployee } from "@/types";
 import { getEmployees } from "@/lib/factorial";
 
-// Marcar como dinámica para evitar pre-renderizado en build estático
-export const dynamic = 'force-dynamic';
-
 export async function POST(request: NextRequest) {
   try {
     const n8nUrl = process.env.N8N_WEBHOOK_URL;

@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { EmployeeExitFormData } from "@/types";
 import { formatDateToYYYYMMDD } from "@/lib/n8n";
 
-// Marcar como dinámica para evitar pre-renderizado en build estático
-export const dynamic = 'force-dynamic';
-
 export async function POST(request: NextRequest) {
   try {
     const n8nUrl = process.env.N8N_EMPLOYEE_EXIT_WEBHOOK_URL;

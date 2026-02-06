@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Marcar como dinámica para evitar pre-renderizado en build estático
-export const dynamic = 'force-dynamic';
-
 export async function GET(request: NextRequest) {
   const webhookUrl = process.env.N8N_MASTERS_WEBHOOK_URL;
   const jwtToken = process.env.N8N_JWT_TOKEN;
