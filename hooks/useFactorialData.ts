@@ -34,15 +34,35 @@ export function useFactorialData(): UseFactorialDataReturn {
     setError(null);
 
     try {
-      // Llamar directamente a Factorial desde el cliente
-      const { getAllFactorialData } = await import("@/lib/factorial-client");
-      const data = await getAllFactorialData();
+      // Llamar a las rutas de API de Next.js (evitan problemas de CORS)
+      const [entitiesRes, rolesRes, employeesRes, contractTypesRes, levelsRes] =
+        await Promise.all([
+          fetch("/api/factorial/legal-entities"),
+          fetch("/api/factorial/roles"),
+          fetch("/api/factorial/employees"),
+          fetch("/api/factorial/contract-types"),
+          fetch("/api/factorial/levels"),
+        ]);
 
-      setLegalEntities(data.legalEntities);
-      setRoles(data.roles);
-      setEmployees(data.employees);
-      setContractTypes(data.contractTypes);
-      setLevels(data.levels);
+      if (!entitiesRes.ok || !rolesRes.ok || !employeesRes.ok || !contractTypesRes.ok || !levelsRes.ok) {
+        const errorData = await entitiesRes.json().catch(() => ({ error: "Error desconocido" }));
+        throw new Error(errorData.error || "Error al cargar datos de Factorial");
+      }
+
+      const [entities, rolesData, employeesData, contractTypesData, levelsData] =
+        await Promise.all([
+          entitiesRes.json(),
+          rolesRes.json(),
+          employeesRes.json(),
+          contractTypesRes.json(),
+          levelsRes.json(),
+        ]);
+
+      setLegalEntities(entities);
+      setRoles(rolesData);
+      setEmployees(employeesData);
+      setContractTypes(contractTypesData);
+      setLevels(levelsData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
       console.error("Error fetching Factorial data:", err);
