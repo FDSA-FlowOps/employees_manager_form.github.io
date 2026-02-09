@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getEmployees } from "@/lib/factorial";
 
+// Durante el build estático, estas rutas no se pueden ejecutar
+// Se devuelve un array vacío para evitar errores de prerendering
 export async function GET(request: NextRequest) {
-  // Prioridad: NEXT_PUBLIC_FACTORIAL_API_KEY > FACTORIAL_API_KEY > header
-  // Durante el build estático, solo usar variable de entorno (request.headers no está disponible)
-  const apiKey = process.env.NEXT_PUBLIC_FACTORIAL_API_KEY || process.env.FACTORIAL_API_KEY || (request?.headers?.get("x-api-key") ?? null);
+  // Prioridad: NEXT_PUBLIC_FACTORIAL_API_KEY > FACTORIAL_API_KEY
+  // Nota: Estas rutas no se usan en GitHub Pages (se usa n8n como proxy), pero se mantienen para desarrollo local
+  // Durante el build estático, no intentamos acceder a request.headers para evitar errores
+  const apiKey = process.env.NEXT_PUBLIC_FACTORIAL_API_KEY || process.env.FACTORIAL_API_KEY;
 
   if (!apiKey) {
-    return NextResponse.json(
-      { error: "API key requerida. Configura FACTORIAL_API_KEY en las variables de entorno o envía x-api-key en el header." },
-      { status: 401 }
-    );
+    // Durante el build estático, devolver array vacío en lugar de error
+    return NextResponse.json([]);
   }
 
   try {
