@@ -36,10 +36,10 @@ jobs:
           NEXT_PUBLIC_AUTH_USERNAME: ${{ secrets.NEXT_PUBLIC_AUTH_USERNAME }}
           NEXT_PUBLIC_AUTH_PASSWORD: ${{ secrets.NEXT_PUBLIC_AUTH_PASSWORD }}
           # Variables públicas para llamadas directas desde el cliente
-          NEXT_PUBLIC_FACTORIAL_API_KEY: ${{ secrets.NEXT_PUBLIC_FACTORIAL_API_KEY }}
           NEXT_PUBLIC_N8N_WEBHOOK_URL: ${{ secrets.NEXT_PUBLIC_N8N_WEBHOOK_URL }}
           NEXT_PUBLIC_N8N_MASTERS_WEBHOOK_URL: ${{ secrets.NEXT_PUBLIC_N8N_MASTERS_WEBHOOK_URL }}
           NEXT_PUBLIC_N8N_EMPLOYEE_EXIT_WEBHOOK_URL: ${{ secrets.NEXT_PUBLIC_N8N_EMPLOYEE_EXIT_WEBHOOK_URL }}
+          NEXT_PUBLIC_N8N_FACTORIAL_WEBHOOK_URL: ${{ secrets.NEXT_PUBLIC_N8N_FACTORIAL_WEBHOOK_URL }}
           NEXT_PUBLIC_N8N_JWT_TOKEN: ${{ secrets.NEXT_PUBLIC_N8N_JWT_TOKEN }}
         run: npm run build:gh-pages
 

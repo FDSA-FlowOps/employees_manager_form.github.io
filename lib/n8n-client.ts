@@ -231,3 +231,140 @@ export async function sendEmployeeExitToN8N(
   return await response.json();
 }
 
+/**
+ * Tipos de recursos de Factorial que se pueden obtener a través de n8n
+ */
+export type FactorialResourceType =
+  | "legal_entities"
+  | "roles"
+  | "employees"
+  | "contract_types"
+  | "levels"
+  | "active_employees";
+
+/**
+ * Mapeo de recursos a URLs de Factorial
+ */
+const FACTORIAL_ENDPOINTS: Record<FactorialResourceType, string> = {
+  legal_entities: "https://api.factorialhr.com/api/2026-01-01/resources/companies/legal_entities",
+  roles: "https://api.factorialhr.com/api/2026-01-01/resources/job_catalog/roles",
+  employees: "https://api.factorialhr.com/api/2026-01-01/resources/employees/employees",
+  contract_types: "https://api.factorialhr.com/api/2026-01-01/resources/contracts/spanish_contract_types",
+  levels: "https://api.factorialhr.com/api/2026-01-01/resources/job_catalog/levels",
+  active_employees: "https://api.factorialhr.com/api/2026-01-01/resources/employees/employees?only_active=true",
+};
+
+/**
+ * Llama a Factorial a través de n8n (proxy genérico)
+ * @param method Método HTTP (GET, POST, etc.)
+ * @param url URL completa de la API de Factorial
+ * @returns Respuesta de Factorial
+ */
+export async function callFactorialViaN8N(
+  method: string = "GET",
+  url: string
+): Promise<any> {
+  const webhookUrl = process.env.NEXT_PUBLIC_N8N_FACTORIAL_WEBHOOK_URL;
+
+  if (!webhookUrl) {
+    throw new Error(
+      "Webhook URL de Factorial no configurada. Configura NEXT_PUBLIC_N8N_FACTORIAL_WEBHOOK_URL en las variables de entorno."
+    );
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 segundos de timeout
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        method,
+        url,
+      }),
+      signal: controller.signal,
+      cache: "no-store",
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `Error al llamar a Factorial: ${response.status} ${response.statusText} - ${errorText}`
+      );
+    }
+
+    const data = await response.json();
+
+    // n8n puede devolver los datos en diferentes formatos
+    if (Array.isArray(data)) {
+      return data;
+    } else if (data && typeof data === "object" && "data" in data && Array.isArray(data.data)) {
+      return data.data;
+    } else if (data && typeof data === "object" && "results" in data && Array.isArray(data.results)) {
+      return data.results;
+    } else {
+      return data;
+    }
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error(`Timeout al llamar a Factorial`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Obtiene datos de Factorial a través de n8n (proxy genérico)
+ * @param resource Tipo de recurso a obtener
+ * @returns Array de datos del recurso solicitado
+ */
+export async function fetchFactorialDataFromN8N<T>(
+  resource: FactorialResourceType
+): Promise<T[]> {
+  const url = FACTORIAL_ENDPOINTS[resource];
+  if (!url) {
+    throw new Error(`Resource desconocido: ${resource}`);
+  }
+
+  const data = await callFactorialViaN8N("GET", url);
+  
+  // Asegurar que devolvemos un array
+  if (Array.isArray(data)) {
+    return data;
+  } else {
+    console.warn(`Formato de respuesta inesperado para ${resource}:`, data);
+    return [];
+  }
+}
+
+/**
+ * Obtiene todos los datos de Factorial en paralelo a través de n8n
+ */
+export async function getAllFactorialDataFromN8N(): Promise<{
+  legalEntities: any[];
+  roles: any[];
+  employees: any[];
+  contractTypes: any[];
+  levels: any[];
+}> {
+  const [legalEntities, roles, employees, contractTypes, levels] = await Promise.all([
+    fetchFactorialDataFromN8N("legal_entities"),
+    fetchFactorialDataFromN8N("roles"),
+    fetchFactorialDataFromN8N("employees"),
+    fetchFactorialDataFromN8N("contract_types"),
+    fetchFactorialDataFromN8N("levels"),
+  ]);
+
+  return {
+    legalEntities,
+    roles,
+    employees,
+    contractTypes,
+    levels,
+  };
+}
+
