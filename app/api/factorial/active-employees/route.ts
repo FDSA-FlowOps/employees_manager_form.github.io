@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const FACTORIAL_API_BASE = "https://api.factorialhr.com/api/2025-01-01/resources";
+const FACTORIAL_API_BASE = "https://api.factorialhr.com/api/2026-01-01/resources";
 
 export async function GET(request: NextRequest) {
   // Prioridad: NEXT_PUBLIC_FACTORIAL_API_KEY > FACTORIAL_API_KEY > header

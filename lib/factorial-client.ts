@@ -31,9 +31,13 @@ async function fetchFactorialData<T>(endpoint: string): Promise<T[]> {
 
   try {
     const response = await fetch(endpoint, {
+      method: "GET",
+      mode: "cors", // Permitir CORS explícitamente
+      credentials: "omit", // No enviar cookies
       headers: {
         "x-api-key": apiKey,
         "Content-Type": "application/json",
+        "Accept": "application/json",
       },
     });
 
