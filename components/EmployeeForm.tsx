@@ -583,7 +583,7 @@ export default function EmployeeForm({
               }`}
             >
               <option value="">Selecciona un perfil</option>
-              <option value="Empleado FDSA">Empleado FDSA</option>
+              <option value="Compañero FDSA">Compañero FDSA</option>
               <option value="Freelance">Freelance</option>
               <option value="Global Talent">Global Talent</option>
             </select>

@@ -213,6 +213,7 @@ export async function sendEmployeeExitToN8N(
     manager_mail: responsableTraspaso?.email || undefined,
     accountId: formData.usuarioJira,
     terminated_on,
+    termination_reason: formData.termination_reason || undefined,
   };
 
   const response = await fetch(n8nUrl, {

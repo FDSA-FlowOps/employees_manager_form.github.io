@@ -8,7 +8,7 @@ import SearchableSelectField from "./SearchableSelectField";
 import SearchableSelectFieldWithSubtitle from "./SearchableSelectFieldWithSubtitle";
 import { useActiveEmployees } from "@/hooks/useActiveEmployees";
 import { useMasters } from "@/hooks/useMasters";
-import { User, Briefcase, Mail, Calendar } from "lucide-react";
+import { User, Briefcase, Mail, Calendar, FileText } from "lucide-react";
 
 interface EmployeeExitFormProps {
   register: UseFormRegister<EmployeeExitFormData>;
@@ -48,7 +48,7 @@ export default function EmployeeExitForm({
   }));
 
   const perfilOptions = [
-    { id: "Empleado FDSA", name: "Empleado FDSA" },
+    { id: "Compañero FDSA", name: "Compañero FDSA" },
     { id: "Freelance", name: "Freelance" },
     { id: "Global Talent", name: "Global Talent" },
   ];
@@ -91,7 +91,7 @@ export default function EmployeeExitForm({
             error={errors.perfil?.message}
             tooltip="Tipo de perfil del empleado"
             value={watch("perfil") || ""}
-            onChange={(value) => setValue("perfil", value as "Empleado FDSA" | "Freelance" | "Global Talent")}
+            onChange={(value) => setValue("perfil", value as "Compañero FDSA" | "Freelance" | "Global Talent")}
             options={perfilOptions}
             placeholder="Selecciona un perfil"
           />
@@ -153,6 +153,26 @@ export default function EmployeeExitForm({
                 {...register("fechaFinalizacion")}
                 className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary transition-colors ${
                   errors.fechaFinalizacion
+                    ? "border-red-500"
+                    : "border-gray-300 hover:border-secondary-light"
+                }`}
+              />
+            </div>
+          </FormField>
+
+          <FormField
+            label="Motivo Finalización"
+            tooltip="Motivo de la finalización del contrato del empleado"
+            error={errors.termination_reason?.message}
+          >
+            <div className="relative">
+              <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                {...register("termination_reason")}
+                placeholder="Ingresa el motivo de finalización"
+                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary transition-colors ${
+                  errors.termination_reason
                     ? "border-red-500"
                     : "border-gray-300 hover:border-secondary-light"
                 }`}

@@ -20,11 +20,11 @@ const employeeExitSchema = z.object({
     .string({ required_error: "El perfil es obligatorio" })
     .min(1, "Debes seleccionar un perfil")
     .refine(
-      (val) => ["Empleado FDSA", "Freelance", "Global Talent"].includes(val),
+      (val) => ["Compañero FDSA", "Freelance", "Global Talent"].includes(val),
       {
         message: "Debes seleccionar un perfil válido",
       }
-    ) as z.ZodType<"Empleado FDSA" | "Freelance" | "Global Talent">,
+    ) as z.ZodType<"Compañero FDSA" | "Freelance" | "Global Talent">,
   usuarioGoogle: z
     .string({ required_error: "El usuario de Google es obligatorio" })
     .min(1, "Debes seleccionar un usuario de Google"),
@@ -37,6 +37,9 @@ const employeeExitSchema = z.object({
   fechaFinalizacion: z
     .string({ required_error: "La fecha de finalización es obligatoria" })
     .min(1, "Debes seleccionar una fecha de finalización"),
+  termination_reason: z
+    .string()
+    .optional(),
 });
 
 export default function SalidaCompanero() {

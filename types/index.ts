@@ -17,7 +17,7 @@ export interface EmployeeFormData {
   importeSalario: number;
   tipoContrato: string;
   usernameGoogle: string;
-  perfil: "Empleado FDSA" | "Freelance" | "Global Talent";
+  perfil: "Compañero FDSA" | "Freelance" | "Global Talent";
   team?: "AMS" | "Webbeds" | "Expansion";
   teamMail?: string;
   calendars?: string[];
@@ -28,11 +28,12 @@ export interface EmployeeFormData {
 
 export interface EmployeeExitFormData {
   employeeId: string;
-  perfil: "Empleado FDSA" | "Freelance" | "Global Talent";
+  perfil: "Compañero FDSA" | "Freelance" | "Global Talent";
   usuarioGoogle: string;
   usuarioJira: string;
   responsableTraspaso?: string;
   fechaFinalizacion: string;
+  termination_reason?: string;
 }
 
 export interface FactorialLegalEntity {

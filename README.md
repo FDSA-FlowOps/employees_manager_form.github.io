@@ -94,19 +94,19 @@ cp .env.example .env
 AUTH_USERNAME=tu_usuario
 AUTH_PASSWORD=tu_contraseña
 
-# Factorial API (NEXT_PUBLIC_* para GitHub Pages - se expone en el cliente)
-NEXT_PUBLIC_FACTORIAL_API_KEY=tu_api_key_de_factorial
-
 # n8n Webhooks (NEXT_PUBLIC_* para GitHub Pages - se exponen en el cliente)
+# NOTA: La API key de Factorial ya NO se necesita aquí, se configura en n8n
 NEXT_PUBLIC_N8N_WEBHOOK_URL=https://tu-instancia-n8n.com/webhook/alta-empleado
 NEXT_PUBLIC_N8N_EMPLOYEE_EXIT_WEBHOOK_URL=https://tu-instancia-n8n.com/webhook/salida-empleado
 NEXT_PUBLIC_N8N_MASTERS_WEBHOOK_URL=https://tu-instancia-n8n.com/webhook/masters
+NEXT_PUBLIC_N8N_FACTORIAL_WEBHOOK_URL=https://tu-instancia-n8n.com/webhook/factorial-proxy
 
 # n8n JWT Token (NEXT_PUBLIC_* para GitHub Pages - se expone en el cliente)
 NEXT_PUBLIC_N8N_JWT_TOKEN=tu_jwt_token_aqui
 
 # NOTA: Para GitHub Pages, todas las variables de n8n deben tener el prefijo NEXT_PUBLIC_
 # ya que las llamadas se hacen directamente desde el cliente (no hay servidor)
+# NOTA: La API key de Factorial ya NO se necesita en el cliente, ya que n8n actúa como proxy
 ```
 
 #### Para Producción:
@@ -138,10 +138,10 @@ Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 |----------|-------------|-----------|
 | `AUTH_USERNAME` | Usuario para el sistema de login | ✅ Sí |
 | `AUTH_PASSWORD` | Contraseña para el sistema de login | ✅ Sí |
-| `NEXT_PUBLIC_FACTORIAL_API_KEY` | API key de Factorial (cliente) | ✅ Sí |
 | `NEXT_PUBLIC_N8N_WEBHOOK_URL` | URL del webhook de n8n para alta de empleados (cliente) | ✅ Sí |
 | `NEXT_PUBLIC_N8N_EMPLOYEE_EXIT_WEBHOOK_URL` | URL del webhook de n8n para salida de empleados (cliente) | ✅ Sí |
 | `NEXT_PUBLIC_N8N_MASTERS_WEBHOOK_URL` | URL del webhook unificado de n8n para maestros (cliente) | ✅ Sí |
+| `NEXT_PUBLIC_N8N_FACTORIAL_WEBHOOK_URL` | URL del webhook de n8n que actúa como proxy de Factorial (cliente) | ✅ Sí |
 | `NEXT_PUBLIC_N8N_JWT_TOKEN` | JWT token para autenticación en las peticiones a n8n (cliente) | ✅ Sí |
 
 **⚠️ IMPORTANTE para GitHub Pages:** Todas las variables de n8n deben tener el prefijo `NEXT_PUBLIC_` porque las llamadas se hacen directamente desde el cliente del navegador (no hay servidor que pueda ocultar estas credenciales).
@@ -354,9 +354,9 @@ jobs:
 
 ### API Key de Factorial
 
-- Se mantiene en memoria durante la sesión
-- No se almacena en localStorage ni cookies
-- Las llamadas a la API se realizan a través de endpoints Next.js para mayor seguridad
+- **Ya NO se necesita en el cliente** - Las llamadas a Factorial se realizan a través de n8n como proxy
+- La API key de Factorial debe estar configurada en n8n como variable de entorno (`FACTORIAL_API_KEY`)
+- Esto evita problemas de CORS y mejora la seguridad al no exponer la API key en el cliente
 
 ### Variables de Entorno
 
@@ -385,6 +385,62 @@ jobs:
 
 ## 🔄 Integración con n8n
 
+### Webhook de Factorial (Proxy)
+
+**IMPORTANTE:** Para evitar problemas de CORS, todas las llamadas a la API de Factorial se realizan a través de un webhook de n8n que actúa como proxy.
+
+#### Configuración del Webhook en n8n
+
+1. **Crea un nuevo workflow en n8n** con un nodo Webhook como trigger
+2. **Configura el webhook** para recibir peticiones POST
+3. **Añade un nodo HTTP Request** que:
+   - Reciba el parámetro `resource` del body (ej: `"legal_entities"`, `"roles"`, `"employees"`, etc.)
+   - Haga la llamada correspondiente a la API de Factorial usando la API key almacenada en n8n
+   - Devuelva los datos en formato JSON
+
+#### Formato de Petición al Webhook de Factorial
+
+El cliente envía una petición POST con:
+
+```json
+{
+  "resource": "legal_entities"  // o "roles", "employees", "contract_types", "levels", "active_employees"
+}
+```
+
+#### Formato de Respuesta Esperado
+
+El webhook debe devolver un array de objetos o un objeto con el recurso solicitado:
+
+```json
+[
+  { "id": 1, "legal_name": "Entidad 1" },
+  { "id": 2, "legal_name": "Entidad 2" }
+]
+```
+
+O alternativamente:
+
+```json
+{
+  "data": [
+    { "id": 1, "legal_name": "Entidad 1" },
+    { "id": 2, "legal_name": "Entidad 2" }
+  ]
+}
+```
+
+#### Recursos Disponibles
+
+- `legal_entities`: Entidades legales (`/api/2026-01-01/resources/companies/legal_entities`)
+- `roles`: Roles (`/api/2026-01-01/resources/job_catalog/roles`)
+- `employees`: Todos los empleados (`/api/2026-01-01/resources/employees/employees`)
+- `contract_types`: Tipos de contrato (`/api/2026-01-01/resources/contracts/spanish_contract_types`)
+- `levels`: Niveles (`/api/2026-01-01/resources/job_catalog/levels`)
+- `active_employees`: Empleados activos (`/api/2026-01-01/resources/employees/employees?only_active=true`)
+
+**Nota:** La API key de Factorial debe estar configurada como variable de entorno en n8n (`FACTORIAL_API_KEY`), NO en el cliente.
+
 ### Formato de Datos para Alta de Empleado
 
 Los datos se transforman automáticamente al formato requerido por n8n:
@@ -407,7 +463,7 @@ Los datos se transforman automáticamente al formato requerido por n8n:
   "salary_amount": 30000,
   "es_contract_type_id": 1,
   "username": "juan.perez",
-  "profile": "Empleado FDSA",
+  "profile": "Compañero FDSA",
   "calendars": ["cal1", "cal2"],
   "groups": ["group1", "group2"]
 }

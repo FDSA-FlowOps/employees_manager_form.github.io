@@ -81,11 +81,11 @@ const employeeSchema = z.object({
     .string({ required_error: "El perfil es obligatorio" })
     .min(1, "Debes seleccionar un perfil")
     .refine(
-      (val) => ["Empleado FDSA", "Freelance", "Global Talent"].includes(val),
+      (val) => ["Compañero FDSA", "Freelance", "Global Talent"].includes(val),
       {
         message: "Debes seleccionar un perfil válido",
       }
-    ) as z.ZodType<"Empleado FDSA" | "Freelance" | "Global Talent">,
+    ) as z.ZodType<"Compañero FDSA" | "Freelance" | "Global Talent">,
   team: z.enum(["AMS", "Webbeds", "Expansion"]).optional(),
   teamMail: z.string().optional(),
   calendars: z.array(z.string()).optional(),
@@ -236,7 +236,7 @@ export default function AltaNuevoCompanero() {
     setValue("importeSalario", 30000);
     setValue("tipoContrato", findContractType("Indefinido"));
     setValue("usernameGoogle", "ilass.echeandia");
-    setValue("perfil", "Empleado FDSA");
+    setValue("perfil", "Compañero FDSA");
     setValue("team", "AMS");
     
     // Mail del Equipo: buscar por email
