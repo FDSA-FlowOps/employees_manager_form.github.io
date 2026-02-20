@@ -7,6 +7,7 @@ import {
   FactorialEmployee,
   FactorialContractType,
   FactorialLevel,
+  FactorialTeam,
 } from "@/types";
 
 interface UseFactorialDataReturn {
@@ -15,6 +16,7 @@ interface UseFactorialDataReturn {
   employees: FactorialEmployee[];
   contractTypes: FactorialContractType[];
   levels: FactorialLevel[];
+  teams: FactorialTeam[];
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
@@ -26,6 +28,7 @@ export function useFactorialData(): UseFactorialDataReturn {
   const [employees, setEmployees] = useState<FactorialEmployee[]>([]);
   const [contractTypes, setContractTypes] = useState<FactorialContractType[]>([]);
   const [levels, setLevels] = useState<FactorialLevel[]>([]);
+  const [teams, setTeams] = useState<FactorialTeam[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,6 +46,7 @@ export function useFactorialData(): UseFactorialDataReturn {
       setEmployees(data.employees);
       setContractTypes(data.contractTypes);
       setLevels(data.levels);
+      setTeams(data.teams ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
       console.error("Error fetching Factorial data:", err);
@@ -64,6 +68,7 @@ export function useFactorialData(): UseFactorialDataReturn {
     employees,
     contractTypes,
     levels,
+    teams,
     isLoading,
     error,
     refetch: fetchData,

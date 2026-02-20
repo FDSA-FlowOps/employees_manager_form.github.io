@@ -30,7 +30,7 @@ export default function EmployeeForm({
   setValue,
   isSubmitting,
 }: EmployeeFormProps) {
-  const { legalEntities, roles, employees, contractTypes, levels, isLoading, error } =
+  const { legalEntities, roles, employees, contractTypes, levels, teams, isLoading, error } =
     useFactorialData();
   const { calendarios, grupos, isLoading: isLoadingMasters, error: errorMasters } = useMasters();
 
@@ -358,6 +358,29 @@ export default function EmployeeForm({
             </label>
           </FormField>
 
+          {watch("tienePeriodoPrueba") && (
+            <FormField
+              label="Fin del periodo de prueba"
+              required
+              tooltip="When the trial period ends."
+              error={errors.trialPeriodoPruebaEndsOn?.message}
+              description="Fecha en la que termina el periodo de prueba (YYYY-MM-DD)"
+            >
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="date"
+                  {...register("trialPeriodoPruebaEndsOn")}
+                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary transition-colors ${
+                    errors.trialPeriodoPruebaEndsOn
+                      ? "border-red-500"
+                      : "border-gray-300 hover:border-secondary-light"
+                  }`}
+                />
+              </div>
+            </FormField>
+          )}
+
           <FormField
             label="Importe Salario"
             required
@@ -405,20 +428,24 @@ export default function EmployeeForm({
           <FormField
             label="Equipo"
             tooltip="Equipo al que pertenece el empleado"
-            error={errors.team?.message}
+            error={errors.team_id?.message}
           >
             <select
-              {...register("team")}
+              value={watch("team_id") ?? ""}
+              onChange={(e) => setValue("team_id", e.target.value || undefined)}
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary transition-colors ${
-                errors.team
+                errors.team_id
                   ? "border-red-500"
                   : "border-gray-300 hover:border-secondary-light"
               }`}
+              disabled={isLoading}
             >
               <option value="">Selecciona un equipo</option>
-              <option value="AMS">AMS</option>
-              <option value="Webbeds">Webbeds</option>
-              <option value="Expansion">Expansion</option>
+              {(Array.isArray(teams) ? teams : []).map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
             </select>
           </FormField>
 

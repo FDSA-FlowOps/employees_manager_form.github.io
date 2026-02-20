@@ -4,6 +4,7 @@ import {
   FactorialEmployee,
   FactorialContractType,
   FactorialLevel,
+  FactorialTeam,
 } from "@/types";
 
 const FACTORIAL_API_BASE = "https://api.factorialhr.com/api/2026-01-01/resources";
@@ -76,6 +77,13 @@ export async function getContractTypes(apiKey: string): Promise<FactorialContrac
 export async function getLevels(apiKey: string): Promise<FactorialLevel[]> {
   return fetchFactorialData<FactorialLevel>(
     `${FACTORIAL_API_BASE}/job_catalog/levels`,
+    apiKey
+  );
+}
+
+export async function getTeams(apiKey: string): Promise<FactorialTeam[]> {
+  return fetchFactorialData<FactorialTeam>(
+    `${FACTORIAL_API_BASE}/teams/teams`,
     apiKey
   );
 }

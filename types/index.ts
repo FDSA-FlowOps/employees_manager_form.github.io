@@ -14,11 +14,12 @@ export interface EmployeeFormData {
   tutor_mail?: string;
   inicioContrato: string;
   tienePeriodoPrueba: boolean;
+  trialPeriodoPruebaEndsOn?: string;
   importeSalario: number;
   tipoContrato: string;
   usernameGoogle: string;
   perfil: "Compañero FDSA" | "Freelance" | "Global Talent";
-  team?: "AMS" | "Webbeds" | "Expansion";
+  team_id?: string;
   teamMail?: string;
   calendars?: string[];
   groups?: string[];
@@ -62,6 +63,11 @@ export interface FactorialOnboardingSpace {
 }
 
 export interface FactorialLevel {
+  id: number;
+  name: string;
+}
+
+export interface FactorialTeam {
   id: number;
   name: string;
 }

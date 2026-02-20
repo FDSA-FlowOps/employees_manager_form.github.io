@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { transformToN8NPayload, sendToN8N } from "@/lib/n8n";
-import { EmployeeFormData, FactorialEmployee } from "@/types";
-import { getEmployees } from "@/lib/factorial";
+import { EmployeeFormData, FactorialEmployee, FactorialTeam } from "@/types";
+import { getEmployees, getTeams } from "@/lib/factorial";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,20 +16,24 @@ export async function POST(request: NextRequest) {
 
     const formData: EmployeeFormData = await request.json();
 
-    // Obtener la lista de empleados para buscar el nombre completo del tutor
+    // Obtener la lista de empleados y equipos de Factorial
     const apiKey = process.env.FACTORIAL_API_KEY || request.headers.get("x-api-key");
     let employees: FactorialEmployee[] = [];
+    let teams: FactorialTeam[] = [];
     if (apiKey) {
       try {
-        employees = await getEmployees(apiKey);
+        [employees, teams] = await Promise.all([
+          getEmployees(apiKey),
+          getTeams(apiKey),
+        ]);
       } catch (error) {
-        console.error("Error al obtener empleados para el tutor:", error);
-        // Continuamos sin la lista de empleados, el tutor será undefined
+        console.error("Error al obtener datos de Factorial:", error);
+        // Continuamos sin empleados/teams; el tutor y team_id serán undefined
       }
     }
 
     // Transformar los datos al formato de n8n
-    const payload = transformToN8NPayload(formData, employees);
+    const payload = transformToN8NPayload(formData, employees, teams);
 
     // Obtener el JWT token de las variables de entorno
     const jwtToken = process.env.N8N_JWT_TOKEN;

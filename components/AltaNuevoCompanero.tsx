@@ -56,6 +56,7 @@ const employeeSchema = z.object({
     .string({ required_error: "La fecha de inicio del contrato es obligatoria" })
     .min(1, "Debes seleccionar una fecha de inicio del contrato"),
   tienePeriodoPrueba: z.boolean().default(false),
+  trialPeriodoPruebaEndsOn: z.string().optional(),
   importeSalario: z.preprocess(
     (val) => {
       if (val === "" || val === null || val === undefined) {
@@ -86,13 +87,22 @@ const employeeSchema = z.object({
         message: "Debes seleccionar un perfil válido",
       }
     ) as z.ZodType<"Compañero FDSA" | "Freelance" | "Global Talent">,
-  team: z.enum(["AMS", "Webbeds", "Expansion"]).optional(),
+  team_id: z.string().optional(),
   teamMail: z.string().optional(),
   calendars: z.array(z.string()).optional(),
   groups: z.array(z.string()).optional(),
   custom_phrase: z.string().optional(),
   image: z.string().optional(),
-});
+}).refine(
+  (data) => {
+    if (!data.tienePeriodoPrueba) return true;
+    return !!data.trialPeriodoPruebaEndsOn?.trim();
+  },
+  {
+    message: "La fecha de fin del periodo de prueba es obligatoria cuando tiene periodo de prueba",
+    path: ["trialPeriodoPruebaEndsOn"],
+  }
+);
 
 export default function AltaNuevoCompanero() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -108,7 +118,7 @@ export default function AltaNuevoCompanero() {
     mail_acceso_enviado?: boolean;
     registrada_nueva_incorporacion?: boolean;
   }>({});
-  const { legalEntities, roles, employees, contractTypes, levels } = useFactorialData();
+  const { legalEntities, roles, employees, contractTypes, levels, teams } = useFactorialData();
   const { calendarios, grupos, isLoading: isLoadingMasters } = useMasters();
 
   const {
@@ -233,12 +243,14 @@ export default function AltaNuevoCompanero() {
     setValue("tutor_mail", "fernando.campos@fdsa.es");
     setValue("inicioContrato", formatDate("16/01/2026"));
     setValue("tienePeriodoPrueba", true);
+    setValue("trialPeriodoPruebaEndsOn", "2026-04-16");
     setValue("importeSalario", 30000);
     setValue("tipoContrato", findContractType("Indefinido"));
     setValue("usernameGoogle", "ilass.echeandia");
     setValue("perfil", "Compañero FDSA");
-    setValue("team", "AMS");
-    
+    const amsTeam = teams.find((t) => t.name.trim().toLowerCase() === "ams");
+    if (amsTeam) setValue("team_id", amsTeam.id.toString());
+
     // Mail del Equipo: buscar por email
     const teamMailValue = findGroupByEmail("ams@fdsa.es");
     setValue("teamMail", teamMailValue);
@@ -286,7 +298,7 @@ export default function AltaNuevoCompanero() {
     try {
       // Llamar directamente a n8n desde el cliente
       const { sendEmployeeToN8N } = await import("@/lib/n8n-client");
-      const result = await sendEmployeeToN8N(formData, employees);
+      const result = await sendEmployeeToN8N(formData, employees, teams);
       
       // Extraer los resultados de la respuesta
       const responseResults = {

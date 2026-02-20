@@ -1,4 +1,4 @@
-import { EmployeeFormData, FactorialEmployee, Group } from "@/types";
+import { EmployeeFormData, FactorialEmployee, FactorialTeam, Group } from "@/types";
 
 export interface N8NPayload {
   first_name: string;
@@ -17,11 +17,13 @@ export interface N8NPayload {
   tutor_mail?: string;
   contract_starts_on: string;
   has_trial_period: boolean;
+  trial_period_ends_on?: string;
   salary_amount: number;
   es_contract_type_id: number;
   username: string;
   profile: string;
   team?: string;
+  team_id?: number;
   team_mail?: string;
   calendars?: string[];
   groups?: string[];
@@ -80,11 +82,26 @@ export function formatDateToYYYYMMDD(dateInput: string): string {
 }
 
 /**
+ * Obtiene team_id (número) y nombre del equipo a partir del team_id del formulario y la lista de equipos
+ */
+function resolveTeamFromId(
+  teamId: string | undefined,
+  teams: FactorialTeam[] | undefined
+): { team_id?: number; team?: string } {
+  if (!teamId || !teams?.length) return {};
+  const id = parseInt(teamId, 10);
+  if (Number.isNaN(id)) return {};
+  const team = teams.find((t) => t.id === id);
+  return team ? { team_id: team.id, team: team.name } : {};
+}
+
+/**
  * Transforma los datos del formulario al formato requerido por n8n
  */
 export function transformToN8NPayload(
   data: EmployeeFormData,
-  employees?: FactorialEmployee[]
+  employees?: FactorialEmployee[],
+  teams?: FactorialTeam[]
 ): N8NPayload {
   // first_name: primera letra mayúscula, resto minúscula
   const first_name = capitalizeFirst(data.nombre);
@@ -99,6 +116,10 @@ export function transformToN8NPayload(
   const contract_starts_on = formatDateToYYYYMMDD(data.inicioContrato);
 
   const companyId = parseInt(data.entidadLegal);
+  const { team_id: resolvedTeamId, team: resolvedTeamName } = resolveTeamFromId(
+    data.team_id,
+    teams
+  );
 
   return {
     first_name,
@@ -119,11 +140,15 @@ export function transformToN8NPayload(
     tutor_mail: data.tutor_mail || undefined,
     contract_starts_on,
     has_trial_period: data.tienePeriodoPrueba,
+    trial_period_ends_on: data.trialPeriodoPruebaEndsOn
+      ? formatDateToYYYYMMDD(data.trialPeriodoPruebaEndsOn)
+      : undefined,
     salary_amount: data.importeSalario,
     es_contract_type_id: parseInt(data.tipoContrato),
     username: data.usernameGoogle,
     profile: data.perfil,
-    team: data.team || undefined,
+    team: resolvedTeamName,
+    team_id: resolvedTeamId,
     team_mail: data.teamMail || undefined,
     calendars: data.calendars && data.calendars.length > 0 ? data.calendars : undefined,
     groups: data.groups && data.groups.length > 0 ? data.groups : undefined,

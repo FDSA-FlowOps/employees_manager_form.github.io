@@ -145,7 +145,8 @@ export async function fetchMastersFromN8N(): Promise<{
  */
 export async function sendEmployeeToN8N(
   formData: EmployeeFormData,
-  employees?: FactorialEmployee[]
+  employees?: FactorialEmployee[],
+  teams?: { id: number; name: string }[]
 ): Promise<any> {
   const n8nUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
 
@@ -156,7 +157,7 @@ export async function sendEmployeeToN8N(
   }
 
   // Transformar los datos al formato de n8n
-  const payload = transformToN8NPayload(formData, employees);
+  const payload = transformToN8NPayload(formData, employees, teams);
 
   const response = await fetch(n8nUrl, {
     method: "POST",
@@ -241,7 +242,8 @@ export type FactorialResourceType =
   | "employees"
   | "contract_types"
   | "levels"
-  | "active_employees";
+  | "active_employees"
+  | "teams";
 
 /**
  * Mapeo de recursos a URLs de Factorial
@@ -253,6 +255,7 @@ const FACTORIAL_ENDPOINTS: Record<FactorialResourceType, string> = {
   contract_types: "https://api.factorialhr.com/api/2026-01-01/resources/contracts/spanish_contract_types",
   levels: "https://api.factorialhr.com/api/2026-01-01/resources/job_catalog/levels",
   active_employees: "https://api.factorialhr.com/api/2026-01-01/resources/employees/employees?only_active=true",
+  teams: "https://api.factorialhr.com/api/2026-01-01/resources/teams/teams",
 };
 
 /**
@@ -351,13 +354,15 @@ export async function getAllFactorialDataFromN8N(): Promise<{
   employees: any[];
   contractTypes: any[];
   levels: any[];
+  teams: any[];
 }> {
-  const [legalEntities, roles, employees, contractTypes, levels] = await Promise.all([
+  const [legalEntities, roles, employees, contractTypes, levels, teams] = await Promise.all([
     fetchFactorialDataFromN8N("legal_entities"),
     fetchFactorialDataFromN8N("roles"),
     fetchFactorialDataFromN8N("employees"),
     fetchFactorialDataFromN8N("contract_types"),
     fetchFactorialDataFromN8N("levels"),
+    fetchFactorialDataFromN8N("teams"),
   ]);
 
   return {
@@ -366,6 +371,7 @@ export async function getAllFactorialDataFromN8N(): Promise<{
     employees,
     contractTypes,
     levels,
+    teams,
   };
 }
 
